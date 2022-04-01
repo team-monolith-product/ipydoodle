@@ -27,7 +27,7 @@ class World:
         CURRENT_WORLD = self
         
         # set canvas to white
-        self.canvas.fill_styled_rects([0],[0],[self.canvas.size[0]],[self.canvas.size[1]], color = [256,256,256])
+        self.canvas.clear()
         
         display(self.canvas)
     
@@ -39,7 +39,12 @@ class World:
                 
     # with condition -> 하위 obj 가 변경되었을때 호출 
     def dirty(self):
-        self.render()        
+        self.render()
+    
+    def move_coor(self, x, y):
+        moved_x = x + self.canvas.size[0]/2
+        moved_y = self.canvas.size[1]/2 - y
+        return moved_x, moved_y
 
             
 class Object:
@@ -60,9 +65,9 @@ class Box(Object):
         super(Box,self).__init__(world, color, alpha)
         
         if not x:
-            x = self.world.canvas.size[0]/2
+            x = 0
         if not y:
-            y = self.world.canvas.size[1]/2
+            y = 0
         if not width:
             width = DEFAULT["Box"]["width"]
         if not height:
@@ -78,7 +83,8 @@ class Box(Object):
         self.world.dirty()
         
     def draw(self):
-        self.world.canvas.fill_styled_rects([self.__x], [self.__y], [self.__width], [self.__height], [self.__color], alpha=self.__alpha)
+        x, y = self.world.move_coor(self.__x, self.__y)
+        self.world.canvas.fill_styled_rects(x, y, [self.__width], [self.__height], [self.__color], alpha=self.__alpha)
     
     @property
     def color(self):
