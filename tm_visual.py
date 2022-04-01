@@ -16,6 +16,20 @@ class Canvas(ipycanvas.Canvas):
     def clear(self):
         super().clear()
         self.fill_styled_rects([0],[0],[self.size[0]],[self.size[1]], color = [256,256,256])
+    
+    def move_coor(self, x, y):
+        moved_x = [xx + self.size[0]/2 for xx in x]
+        moved_y = [self.size[1]/2 - yy for yy in y]
+        return moved_x, moved_y
+    
+    def moved_coor_rect_center(self, x, y, width, height):
+        moved_x = [xx - width[i]/2 for i, xx in enumerate(x)]
+        moved_y = [yy + height[i]/2 for i, yy in enumerate(y)]
+        return moved_x, moved_y
+    
+    def fill_styled_rects(self, x, y, width, height, color, alpha=1):
+        x,y = self.move_coor(*self.moved_coor_rect_center(x,y,width,height))
+        super().fill_styled_rects(x, y, width, height, color, alpha)
         
         
 class World:
@@ -83,8 +97,7 @@ class Box(Object):
         self.world.dirty()
         
     def draw(self):
-        x, y = self.world.move_coor(self.__x, self.__y)
-        self.world.canvas.fill_styled_rects(x, y, [self.__width], [self.__height], [self.__color], alpha=self.__alpha)
+        self.world.canvas.fill_styled_rects([self.__x], [self.__y], [self.__width], [self.__height], [self.__color], alpha=self.__alpha)
     
     @property
     def color(self):
