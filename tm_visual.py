@@ -1,83 +1,135 @@
 import ipycanvas
+import time
+import threading
 
-# class poly():
-#     def __init__(self, points, color, line, alpha):
-#         self.color = color
-#         self.line = line
-#         self.alpha = alpha
-    
-#         self.width = max([p[0] for p in points]) = min([p[0] for p in points])
-#         self.height = max([p[1] for p in points]) = min([p[0] for p in points])
-        
-#         self.center_x = min([p[0] for p in points]) + width/2
-#         self.center_y = min([p[1] for p in points]) + height/2
-    
-#     def render(self):
-    
-    
+FREQUENCY = 30
+DEFAULT = {
+            "Box" : {"width":100,
+                    "height":100},
+            "Ball" : {"radius":50}
+          }
+
+CURRENT_WORLD = None
+
+
 class Canvas(ipycanvas.Canvas):
-    
-    def __init__(self, *args, **kwargs):
-        super(Canvas, self).__init__()
+    def clear(self):
+        super().clear()
+        self.fill_styled_rects([0],[0],[self.size[0]],[self.size[1]], color = [256,256,256])
+        
+        
+class World:
+    def __init__(self):
+        self.canvas = Canvas()
+        self.objects = []
+        
+        global CURRENT_WORLD
+        CURRENT_WORLD = self
         
         # set canvas to white
-        self.fill_styled_rects([0],[0],[self.size[0]],[self.size[1]], color = [256,256,256])
-        print("muyaho2")
+        self.canvas.fill_styled_rects([0],[0],[self.canvas.size[0]],[self.canvas.size[1]], color = [256,256,256])
         
-    def box(self, x = None , y = None , width = None , height = None , color = [0,0,0], alpha=1):
-        
-        if x is None:
-            x = self.size[0]/2
-        
-        if y is None:
-            y = self.size[1]/2
-        
-        if width is None:
-            width = self.size[0]/10
-        
-        if height is None:
-            height =width
-            
-        
-        coor_x = x - width /2
-        coor_y = y - height /2
-        self.fill_styled_rects([coor_x], [coor_y], [width], [height], [color], alpha=1)
+        display(self.canvas)
     
-    def ball(self, x = None , y = None , radius = None , color = [0,0,0], alpha=1):
-        
-        if x is None:
-            x = self.size[0]/2
-        
-        if y is None:
-            y = self.size[1]/2
-        
-        if radius is None:
-            radius = self.size[0]/10
+    def render(self):
+        with ipycanvas.hold_canvas(self.canvas):
+            self.canvas.clear()
+            for obj in self.objects:
+                obj.draw()
+                
+    # with condition -> 하위 obj 가 변경되었을때 호출 
+    def dirty(self):
+        self.render()        
+
             
-        self.fill_styled_circles([x], [y], [radius], [color], alpha=1)
+class Object:
+    def __init__(self, world=None, color=[0,0,0], alpha=1):
+        if not world:
+            global CURRENT_WORLD
+            if not CURRENT_WORLD:
+                CURRENT_WORLD = World()
+            self.world = CURRENT_WORLD
+        else:
+            self.world = world
 
-                          
-                          
-# import time
+        self.world.objects.append(self)
 
-# class World:
-#   PERIOD = 10 # 10ms
-#   def render(self) :
-#     now = time.time()
-#     if now - self.rendered_at < PERIOD :
-#       return
-#     # do render
-#     self.rendered_at = now
+        
+class Box(Object):
+    def __init__(self, world=None, x=None , y=None , width=None , height=None , color=[0,0,0], alpha=1):
+        super(Box,self).__init__(world, color, alpha)
+        
+        if not x:
+            x = self.world.canvas.size[0]/2
+        if not y:
+            y = self.world.canvas.size[1]/2
+        if not width:
+            width = DEFAULT["Box"]["width"]
+        if not height:
+            height = DEFAULT["Box"]["height"]
+        
+        self.__x = x
+        self.__y = y
+        self.__width = width
+        self.__height = height
+        self.__color = color
+        self.__alpha = alpha
+        
+        self.world.dirty()
+        
+    def draw(self):
+        self.world.canvas.fill_styled_rects([self.__x], [self.__y], [self.__width], [self.__height], [self.__color], alpha=self.__alpha)
+    
+    @property
+    def color(self):
+        return self.__color
+    
+    @property
+    def alpha(self):
+        return self.__alpha
+        
+    @color.setter
+    def color(self, val):
+        self.__color = val
+        self.world.dirty()
 
-# class Box:
-#   def __init__(self, world):
-#     self.world = world
-  
-#   @property
-#   def x(self):
-#     return self.__x
+    @alpha.setter
+    def alpha(self, val):
+        self.__alpha = val
+        self.world.dirty()
+        
+    @property
+    def x(self):
+        return self.__x
+    
+    @property
+    def y(self):
+        return self.__y
+    
+    @property
+    def width(self):
+        return self.__width
+    
+    @property
+    def height(self):
+        return self.__height
+        
+    @x.setter
+    def x(self, val):
+        self.__x = val
+        self.world.dirty()
 
-#   @x.setter
-#   def x(self, val):
-#     self.__x = val
-#     self.world.render()
+    @y.setter
+    def y(self, val):
+        self.__y = val
+        self.world.dirty()
+        
+    @width.setter
+    def width(self, val):
+        self.__width = val
+        self.world.dirty()
+
+    @height.setter
+    def height(self, val):
+        self.__height = val
+        self.world.dirty()
