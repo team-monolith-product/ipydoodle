@@ -3,6 +3,8 @@ import time
 import threading
 import numpy as np
 import sys
+import time
+import threading
 
 FREQUENCY = 30
 DEFAULT = {
@@ -67,7 +69,8 @@ class World:
     def __init__(self):
         self.canvas = Canvas()
         self.objects = []
-        
+        self.rendered_at = None
+
         global CURRENT_WORLD
         CURRENT_WORLD = self
         
@@ -77,14 +80,28 @@ class World:
         display(self.canvas)
     
     def render(self):
+        self.rendered_at = time.time()
+
         with ipycanvas.hold_canvas(self.canvas):
             self.canvas.clear()
             for obj in self.objects:
                 obj.draw()
-                
-    # with condition -> 하위 obj 가 변경되었을때 호출 
+
     def dirty(self):
-        self.render()
+        now = time.time()
+        if self.rendered_at:
+            if now - self.rendered_at >= (1/FREQUENCY):
+                self.render()
+            else:
+                old_rendered_at = self.rendered_at
+                def func():
+                    time.sleep((1/FREQUENCY) - (now - self.rendered_at))
+                    if old_rendered_at == self.rendered_at:
+                        self.render()
+                t = threading.Thread(target = func)
+                t.start()
+        else:
+            self.render()
     
     def move_coor(self, x, y):
         moved_x = x + self.canvas.size[0]/2
@@ -92,20 +109,26 @@ class World:
         return moved_x, moved_y
 
             
-class Object:
+class WorldObject:
     def __init__(self, world=None):
         if not world:
             global CURRENT_WORLD
             if not CURRENT_WORLD:
                 CURRENT_WORLD = World()
-            self.world = CURRENT_WORLD
+            self.__world = CURRENT_WORLD
         else:
-            self.world = world
+            self.__world = world
 
-        self.world.objects.append(self)
+        self.__world.objects.append(self)
+    
+    def dirty(self):
+        return self.__world.dirty()
 
+    def canvas(self):
+        return self.__world.canvas
         
-class Box(Object):
+ 
+class Box(WorldObject):
     def __init__(self, world=None, x=None , y=None , width=None , height=None , color=[0,0,0], alpha=1):
         super(Box,self).__init__(world)
         
@@ -125,10 +148,10 @@ class Box(Object):
         self.__color = color
         self.__alpha = alpha
         
-        self.world.dirty()
+        self.dirty()
         
     def draw(self):
-        self.world.canvas.fill_styled_rects([self.__x], [self.__y], [self.__width], [self.__height], [self.__color], alpha=self.__alpha)
+        self.canvas().fill_styled_rects([self.__x], [self.__y], [self.__width], [self.__height], [self.__color], alpha=self.__alpha)
     
     @property
     def color(self):
@@ -141,12 +164,12 @@ class Box(Object):
     @color.setter
     def color(self, val):
         self.__color = val
-        self.world.dirty()
+        self.dirty()
 
     @alpha.setter
     def alpha(self, val):
         self.__alpha = val
-        self.world.dirty()
+        self.dirty()
         
     @property
     def x(self):
@@ -167,25 +190,25 @@ class Box(Object):
     @x.setter
     def x(self, val):
         self.__x = val
-        self.world.dirty()
+        self.dirty()
 
     @y.setter
     def y(self, val):
         self.__y = val
-        self.world.dirty()
+        self.dirty()
         
     @width.setter
     def width(self, val):
         self.__width = val
-        self.world.dirty()
+        self.dirty()
 
     @height.setter
     def height(self, val):
         self.__height = val
-        self.world.dirty()
+        self.dirty()
         
 
-class Line(Object):
+class Line(WorldObject):
     def __init__(self, world=None, x1=None , y1=None , x2=None , y2=None , color=[0,0,0], alpha=1):
         super().__init__(world)
         
@@ -208,10 +231,10 @@ class Line(Object):
         self.__color = color
         self.__alpha = alpha
         
-        self.world.dirty()
+        self.dirty()
         
     def draw(self):
-        self.world.canvas.stroke_styled_line_segments([[(self.__x1,self.__y1),(self.__x2,self.__y2)]], color=self.__color)
+        self.canvas().stroke_styled_line_segments([[(self.__x1,self.__y1),(self.__x2,self.__y2)]], color=self.__color)
     
     @property
     def color(self):
@@ -224,12 +247,12 @@ class Line(Object):
     @color.setter
     def color(self, val):
         self.__color = val
-        self.world.dirty()
+        self.dirty()
 
     @alpha.setter
     def alpha(self, val):
         self.__alpha = val
-        self.world.dirty()
+        self.dirty()
         
     @property
     def x1(self):
@@ -250,25 +273,25 @@ class Line(Object):
     @x1.setter
     def x1(self, val):
         self.__x1 = val
-        self.world.dirty()
+        self.dirty()
 
     @y1.setter
     def y1(self, val):
         self.__y1 = val
-        self.world.dirty()
+        self.dirty()
         
     @x2.setter
     def x2(self, val):
         self.__x2 = val
-        self.world.dirty()
+        self.dirty()
 
     @y2.setter
     def y2(self, val):
         self.__y2 = val
-        self.world.dirty()
+        self.dirty()
         
 
-class Circle(Object):
+class Circle(WorldObject):
     def __init__(self, world=None, x=None , y=None , radius=None, color=[0,0,0], alpha=1):
         super().__init__(world)
         
@@ -284,10 +307,10 @@ class Circle(Object):
         self.__color = color
         self.__alpha = alpha
         
-        self.world.dirty()
+        self.dirty()
         
     def draw(self):
-        self.world.canvas.fill_styled_circles([self.__x], [self.__y], [self.__radius], color=self.__color)
+        self.canvas().fill_styled_circles([self.__x], [self.__y], [self.__radius], color=self.__color)
     
     @property
     def color(self):
@@ -300,12 +323,12 @@ class Circle(Object):
     @color.setter
     def color(self, val):
         self.__color = val
-        self.world.dirty()
+        self.dirty()
 
     @alpha.setter
     def alpha(self, val):
         self.__alpha = val
-        self.world.dirty()
+        self.dirty()
         
     @property
     def x(self):
@@ -322,14 +345,14 @@ class Circle(Object):
     @x.setter
     def x(self, val):
         self.__x = val
-        self.world.dirty()
+        self.dirty()
 
     @y.setter
     def y(self, val):
         self.__y = val
-        self.world.dirty()
+        self.dirty()
         
     @radius.setter
     def radius(self, val):
         self.__radius = val
-        self.world.dirty()
+        self.dirty()
