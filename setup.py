@@ -10,5 +10,11 @@ setup(
             "ipython-config/ipython_config.py"
         ])
     ],
+    install_requires=[
+        'ipycanvas',
+        'ipywidgets>=7.6.0',
+        'pillow>=6.0',
+        'numpy'
+    ],
     packages=['ipydoodle'],
 )
