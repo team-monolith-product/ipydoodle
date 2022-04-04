@@ -1,0 +1,1 @@
+recursive-include ipython-config *.py
