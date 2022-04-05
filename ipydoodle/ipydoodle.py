@@ -103,11 +103,9 @@ class World:
         else:
             self.render()
     
-    def move_coor(self, x, y):
-        moved_x = x + self.canvas.size[0]/2
-        moved_y = self.canvas.size[1]/2 - y
-        return moved_x, moved_y
-
+    def clear(self):
+        self.objects = []
+        self.canvas.clear()
             
 class WorldObject:
     def __init__(self, world=None):
