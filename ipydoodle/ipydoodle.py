@@ -1,10 +1,10 @@
 import ipycanvas
 import time
 import threading
-import numpy as np
 import sys
 import time
 import threading
+from IPython.display import display
 
 FREQUENCY = 30
 DEFAULT = {
@@ -19,11 +19,12 @@ CURRENT_WORLD = None
 class Canvas(ipycanvas.Canvas):
     def clear(self):
         super().clear()
+        
         self.fill_styled_rects([0],[0],[self.size[0]],[self.size[1]], color = [256,256,256])
         
         # axis
         self.stroke_styled_line_segments([[(-self.size[0],0),(self.size[0],0)],[(0,self.size[1]),(0,-self.size[1])]], color=[100,100,100])
-    
+
     def move_coor(self, x, y):
         try : 
             if type(x) == int and type(y) == int :
@@ -66,8 +67,8 @@ class Canvas(ipycanvas.Canvas):
         super().stroke_styled_line_segments(points, color, alpha, points_per_line_segment)
         
 class World:
-    def __init__(self):
-        self.canvas = Canvas()
+    def __init__(self, width = 700, height = 500):
+        self.canvas = Canvas(width = 700, height = 500)
         self.objects = []
         self.rendered_at = None
 
@@ -106,7 +107,27 @@ class World:
     def clear(self):
         self.objects = []
         self.canvas.clear()
-            
+
+    @property
+    def width(self):
+        return self.__width
+    
+    @property
+    def height(self):
+        return self.__height
+        
+    @width.setter
+    def width(self, val):
+        self.__width = val
+        self.canvas.width = self.__width
+        self.canvas.clear()
+
+    @height.setter
+    def height(self, val):
+        self.__height = val
+        self.canvas.height = self.__height
+        self.canvas.clear()
+
 class WorldObject:
     def __init__(self, world=None):
         if not world:
