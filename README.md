@@ -12,10 +12,6 @@ ipydoodle에서는 자유롭게 World를 만들고 Object를 만들고 움직일
 
 <br>
 
----
-
-<br>
-
 ## Documentation(문서)
 
 <br>
@@ -23,10 +19,6 @@ ipydoodle에서는 자유롭게 World를 만들고 Object를 만들고 움직일
 ipydoodle과 관련된 문서는 아래의 링크에서 확인할 수 있습니다.
 
 https://github.com/team-monolith-product/ipydoodle/wiki
-
-<br>
-
----
 
 <br>
 
@@ -39,10 +31,6 @@ pip를 통해 설치할 수 있습니다.
 ```
 pip install ipydoodle
 ```
-
-<br>
-
----
 
 <br>
 
