@@ -45,7 +45,3 @@ pip install ipydoodle
 ### 자유낙하 시뮬레이션
 
 ![image](docs/images/example1.gif)
-
-
-
-
