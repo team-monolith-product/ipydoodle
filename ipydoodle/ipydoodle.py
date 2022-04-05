@@ -68,7 +68,9 @@ class Canvas(ipycanvas.Canvas):
         
 class World:
     def __init__(self, width = 700, height = 500):
-        self.canvas = Canvas(width = 700, height = 500)
+        self.__width = width
+        self.__height = height
+        self.canvas = Canvas(width = self.__width, height = self.__height)
         self.objects = []
         self.rendered_at = None
 
