@@ -1,47 +1,53 @@
+# Language
+[Englsh](README.md)
+
+[한국어](README.ko.md)
+
 # ipydoodle
 
 ![image](docs/images/ipydoodle.png)
 
-ipydoodle은 학생들을 위한 2D 시각화 라이브러리입니다.
+ipydoodle is 2D visualization library for student running on Jupyter environment.
 
-ipydoodle에서는 자유롭게 World를 만들고 Object를 만들고 움직일 수 있습니다.
+# Goals
 
-이외에도 학생들이 만들고 싶은 모든 것들을 자유롭게 만들 수 있습니다.
+ipydoodle is made for students who are not familiar with coding. So our goal is helping them learn coding easily and joyfully.
 
-여러분도 ipydoodle과 함께 자신만의 작품을 만들어보세요!!!
+## Immediate Feedback
 
-<br>
+In order for students to be interested, even a very simple code need to be responsive when they are executed, like "Hello, World" In ipydoodle, "Hello, World" is:
 
-## Documentation(문서)
+![image](docs/images/helloworld.png)
 
-<br>
+## Object Based Render
 
-ipydoodle과 관련된 문서는 아래의 링크에서 확인할 수 있습니다.
+When you define an object ipydoodle renders the object similar to the real world. This intuitive structure helps students understand ipydoodle easily.
 
-https://github.com/team-monolith-product/ipydoodle/wiki
+For example, the following code slowly moves the circle in the center of the screen to the right:
+```python
+from ipydoodle import *
+import time
+World()
+ball = Circle()
+for _ in range(100):
+    ball.x += 1
+    time.sleep(0.05)
+```
 
-<br>
+# Documentation
 
-## Installation(설치)
+Documentation is [here](https://github.com/team-monolith-product/ipydoodle/wiki).
 
-<br>
+# Installation
 
-pip를 통해 설치할 수 있습니다.
+Just use pip.
 
 ```
 pip install ipydoodle
 ```
 
-<br>
+# Examples
 
-## Example(예시)
-
-<br>
-
-아래는 ipydoodle로 만든 여러 프로젝트의 예시입니다.
-
-<br>
-
-### 자유낙하 시뮬레이션
+## Free Fall Simulation
 
 ![image](docs/images/example1.gif)
