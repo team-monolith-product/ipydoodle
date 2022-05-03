@@ -25,8 +25,6 @@ class Canvas(ipycanvas.Canvas):
         self.__axis_color = kwargs['axis_color']
     def clear(self):
         super().clear()
-        
-        print(self.color.color)
         self.fill_styled_rects([0],[0],[self.size[0]],[self.size[1]], color = self.__color.color)
         
         # axis
@@ -80,7 +78,7 @@ class Canvas(ipycanvas.Canvas):
     
     @color.setter
     def color(self, val):
-        self.__color = self.val
+        self.__color = val
     
     @property
     def axis(self):
@@ -101,6 +99,9 @@ class Canvas(ipycanvas.Canvas):
 class Color:
     def __init__(self, val):
         self.__color = self.__change_color_type(val)
+
+    def __repr__(self):
+        return str(self.__color)
         
     def __change_color_type(self,val):
         if type(val) is str:
@@ -243,7 +244,9 @@ class World:
     
     @color.setter
     def color(self, val):
-        self.__color = self.val
+        self.__color = Color(val)
+        self.canvas.color = self.__color
+
         self.canvas.clear()    
     
     @property
