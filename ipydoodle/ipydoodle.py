@@ -5,6 +5,7 @@ import sys
 import time
 import threading
 from IPython.display import display
+import numpy
 
 FREQUENCY = 30
 DEFAULT = {
@@ -20,7 +21,7 @@ class Canvas(ipycanvas.Canvas):
     def clear(self):
         super().clear()
         
-        self.fill_styled_rects([0],[0],[self.size[0]],[self.size[1]], color = [256,256,256])
+        self.fill_styled_rects([0],[0],[self.size[0]],[self.size[1]], color = [255,255,255])
         
         # axis
         self.stroke_styled_line_segments([[(-self.size[0],0),(self.size[0],0)],[(0,self.size[1]),(0,-self.size[1])]], color=[100,100,100])
@@ -65,7 +66,79 @@ class Canvas(ipycanvas.Canvas):
                 points[l_idx][p_idx] = self.move_coor(*points[l_idx][p_idx])
         
         super().stroke_styled_line_segments(points, color, alpha, points_per_line_segment)
+
+
+class Color:
+    def __init__(self, val):
+        self.__color = self.__change_color_type(val)
         
+    def __change_color_type(self,val):
+        if type(val) is str:
+            if val[0] == '#' and len(val) == 7:
+                retval = (int(val[1:3]),int(val[3:5]),int(val[5:7]))
+            else:
+                retval = self.__str2list(val.lower())
+        elif type(val) is list:
+            retval = tuple(val)
+        elif type(val) is numpy.ndarray:
+            retval = tuple(val)
+        elif type(val) is tuple:
+            retval = val
+        else:
+            raise TypeError(f'Color does not support {type(val)} parameter')
+            
+        return retval
+    
+    def __str2list(self,val):
+        color_dict = {
+            'black' : (0,0,0),
+            'white' : (255,255,255),
+            'red' : (255,0,0),
+            'lime' : (0,255,0),
+            'blue' : (0,0,255),
+            'yellow' : (255,255,0),
+            'cyan' : (0,255,255),
+            'magenta' : (255,0,255),
+            'silver' : (192,192,192),
+            'gray' : (128,128,128),
+            'maroon' : (128,0,0),
+            'olive' : (128,128,0),
+            'green' : (0,128,0),
+            'purple' : (128,0,128),
+            'teal' : (0,128,128),
+            'navy' : (0,0,128),
+            '검정색' : (0,0,0),
+            '흰색' : (255,255,255),
+            '빨강색' : (255,0,0),
+            '연두색' : (0,255,0),
+            '파란색' : (0,0,255),
+            '노란색' : (255,255,0),
+            '옥색' : (0,255,255),
+            '분홍색' : (255,0,255),
+            '은색' : (192,192,192),
+            '회색' : (128,128,128),
+            '적갈색' : (128,0,0),
+            '올리브색' : (128,128,0),
+            '초록색' : (0,128,0),
+            '보라색' : (128,0,128),
+            '암청색' : (0,128,128),
+            '남색' : (0,0,128)
+        }
+        
+        try:
+            return color_dict[val]
+        except:
+            raise ValueError(f'Wrong name for color : {val}')
+            
+    @property
+    def color(self):
+        return self.__color
+    
+    @color.setter
+    def color(self, val):
+        self.__color = self.__change_color_type(val)
+
+
 class World:
     def __init__(self, width = 700, height = 500):
         self.__width = width
@@ -150,7 +223,7 @@ class WorldObject:
         
  
 class Box(WorldObject):
-    def __init__(self, world=None, x=None , y=None , width=None , height=None , color=[0,0,0], alpha=1):
+    def __init__(self, world=None, x=None , y=None , width=None , height=None , color=(0,0,0), alpha=1):
         super(Box,self).__init__(world)
         
         if not x:
@@ -166,17 +239,17 @@ class Box(WorldObject):
         self.__y = y
         self.__width = width
         self.__height = height
-        self.__color = color
+        self.__color = Color(color)
         self.__alpha = alpha
         
         self.dirty()
         
     def draw(self):
-        self.canvas().fill_styled_rects([self.__x], [self.__y], [self.__width], [self.__height], [self.__color], alpha=self.__alpha)
+        self.canvas().fill_styled_rects([self.__x], [self.__y], [self.__width], [self.__height], [self.__color.color], alpha=self.__alpha)
     
     @property
     def color(self):
-        return self.__color
+        return self.__color.color
     
     @property
     def alpha(self):
@@ -184,7 +257,7 @@ class Box(WorldObject):
         
     @color.setter
     def color(self, val):
-        self.__color = val
+        self.__color.color = val                                              
         self.dirty()
 
     @alpha.setter
@@ -230,7 +303,7 @@ class Box(WorldObject):
         
 
 class Line(WorldObject):
-    def __init__(self, world=None, x1=None , y1=None , x2=None , y2=None , color=[0,0,0], alpha=1):
+    def __init__(self, world=None, x1=None , y1=None , x2=None , y2=None , color=(0,0,0), alpha=1):
         super().__init__(world)
         
         if x1 is None and y1 is None and x2 is None and y2 is None:
@@ -249,17 +322,17 @@ class Line(WorldObject):
         self.__y1 = y1
         self.__x2 = x2
         self.__y2 = y2
-        self.__color = color
+        self.__color = Color(color)
         self.__alpha = alpha
         
         self.dirty()
         
     def draw(self):
-        self.canvas().stroke_styled_line_segments([[(self.__x1,self.__y1),(self.__x2,self.__y2)]], color=self.__color)
+        self.canvas().stroke_styled_line_segments([[(self.__x1,self.__y1),(self.__x2,self.__y2)]], color=self.__color.color)
     
     @property
     def color(self):
-        return self.__color
+        return self.__color.color
     
     @property
     def alpha(self):
@@ -267,7 +340,7 @@ class Line(WorldObject):
         
     @color.setter
     def color(self, val):
-        self.__color = val
+        self.__color.color = val
         self.dirty()
 
     @alpha.setter
@@ -313,7 +386,7 @@ class Line(WorldObject):
         
 
 class Circle(WorldObject):
-    def __init__(self, world=None, x=None , y=None , radius=None, color=[0,0,0], alpha=1):
+    def __init__(self, world=None, x=None , y=None , radius=None, color=(0,0,0), alpha=1):
         super().__init__(world)
         
         if x is None and y is None:
@@ -325,17 +398,17 @@ class Circle(WorldObject):
         self.__x = x
         self.__y = y
         self.__radius = radius
-        self.__color = color
+        self.__color = Color(color)
         self.__alpha = alpha
         
         self.dirty()
         
     def draw(self):
-        self.canvas().fill_styled_circles([self.__x], [self.__y], [self.__radius], color=self.__color)
+        self.canvas().fill_styled_circles([self.__x], [self.__y], [self.__radius], color=self.__color.color)
     
     @property
     def color(self):
-        return self.__color
+        return self.__color.color
     
     @property
     def alpha(self):
@@ -343,7 +416,7 @@ class Circle(WorldObject):
         
     @color.setter
     def color(self, val):
-        self.__color = val
+        self.__color.color = val
         self.dirty()
 
     @alpha.setter
