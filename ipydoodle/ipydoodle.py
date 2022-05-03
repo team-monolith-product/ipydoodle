@@ -18,13 +18,20 @@ CURRENT_WORLD = None
 
 
 class Canvas(ipycanvas.Canvas):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.__color = kwargs['color']
+        self.__axis = kwargs['axis']
+        self.__axis_color = kwargs['axis_color']
     def clear(self):
         super().clear()
         
-        self.fill_styled_rects([0],[0],[self.size[0]],[self.size[1]], color = [255,255,255])
+        print(self.color.color)
+        self.fill_styled_rects([0],[0],[self.size[0]],[self.size[1]], color = self.__color.color)
         
         # axis
-        self.stroke_styled_line_segments([[(-self.size[0],0),(self.size[0],0)],[(0,self.size[1]),(0,-self.size[1])]], color=[100,100,100])
+        if self.__axis:
+            self.stroke_styled_line_segments([[(-self.size[0],0),(self.size[0],0)],[(0,self.size[1]),(0,-self.size[1])]], color=self.__axis_color.color)
 
     def move_coor(self, x, y):
         try : 
@@ -66,7 +73,30 @@ class Canvas(ipycanvas.Canvas):
                 points[l_idx][p_idx] = self.move_coor(*points[l_idx][p_idx])
         
         super().stroke_styled_line_segments(points, color, alpha, points_per_line_segment)
-
+    
+    @property
+    def color(self):
+        return self.__color
+    
+    @color.setter
+    def color(self, val):
+        self.__color = self.val
+    
+    @property
+    def axis(self):
+        return self.__axis
+    
+    @axis.setter
+    def axis(self, val):
+        self.__axis = self.val
+    
+    @property
+    def axis_color(self):
+        return self.__axis_color
+    
+    @axis_color.setter
+    def axis_color(self, val):
+        self.__axis_color = self.val
 
 class Color:
     def __init__(self, val):
@@ -75,15 +105,15 @@ class Color:
     def __change_color_type(self,val):
         if type(val) is str:
             if val[0] == '#' and len(val) == 7:
-                retval = (int(val[1:3]),int(val[3:5]),int(val[5:7]))
+                retval = list(int(val[1:3]),int(val[3:5]),int(val[5:7]))
             else:
                 retval = self.__str2list(val.lower())
         elif type(val) is list:
-            retval = tuple(val)
-        elif type(val) is numpy.ndarray:
-            retval = tuple(val)
-        elif type(val) is tuple:
             retval = val
+        elif type(val) is numpy.ndarray:
+            retval = list(val)
+        elif type(val) is tuple:
+            retval = list(val)
         else:
             raise TypeError(f'Color does not support {type(val)} parameter')
             
@@ -126,7 +156,7 @@ class Color:
         }
         
         try:
-            return color_dict[val]
+            return list(color_dict[val])
         except:
             raise ValueError(f'Wrong name for color : {val}')
             
@@ -140,12 +170,16 @@ class Color:
 
 
 class World:
-    def __init__(self, width = 700, height = 500):
+    def __init__(self, width = 700, height = 500, color = 'white', axis = True, axis_color = 'black'):
         self.__width = width
         self.__height = height
-        self.canvas = Canvas(width = self.__width, height = self.__height)
+        self.__color = Color(color)
+        self.__axis = axis
+        self.__axis_color = Color(axis_color)
+        self.canvas = Canvas(width = self.__width, height = self.__height, color = self.__color, axis = self.__axis, axis_color = self.__axis_color)
         self.objects = []
         self.rendered_at = None
+
 
         global CURRENT_WORLD
         CURRENT_WORLD = self
@@ -203,6 +237,33 @@ class World:
         self.canvas.height = self.__height
         self.canvas.clear()
 
+    @property
+    def color(self):
+        return self.__color
+    
+    @color.setter
+    def color(self, val):
+        self.__color = self.val
+        self.canvas.clear()    
+    
+    @property
+    def axis(self):
+        return self.__axis
+
+    @axis.setter
+    def axis(self, val):
+        self.__axis = self.val
+        self.canvas.clear()
+
+    @property
+    def axis_color(self):
+        return self.__axis_color
+    
+    @axis_color.setter
+    def axis_color(self, val):
+        self.__axis_color = self.val
+        self.canvas.clear()
+
 class WorldObject:
     def __init__(self, world=None):
         if not world:
@@ -223,7 +284,7 @@ class WorldObject:
         
  
 class Box(WorldObject):
-    def __init__(self, world=None, x=None , y=None , width=None , height=None , color=(0,0,0), alpha=1):
+    def __init__(self, world=None, x=None , y=None , width=None , height=None , color='black', alpha=1):
         super(Box,self).__init__(world)
         
         if not x:
@@ -303,7 +364,7 @@ class Box(WorldObject):
         
 
 class Line(WorldObject):
-    def __init__(self, world=None, x1=None , y1=None , x2=None , y2=None , color=(0,0,0), alpha=1):
+    def __init__(self, world=None, x1=None , y1=None , x2=None , y2=None , color='black', alpha=1):
         super().__init__(world)
         
         if x1 is None and y1 is None and x2 is None and y2 is None:
@@ -386,7 +447,7 @@ class Line(WorldObject):
         
 
 class Circle(WorldObject):
-    def __init__(self, world=None, x=None , y=None , radius=None, color=(0,0,0), alpha=1):
+    def __init__(self, world=None, x=None , y=None , radius=None, color='black', alpha=1):
         super().__init__(world)
         
         if x is None and y is None:
