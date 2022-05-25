@@ -25,20 +25,20 @@ class Canvas(ipycanvas.Canvas):
         self.__axis_color = kwargs['axis_color']
     def clear(self):
         super().clear()
-        self.fill_styled_rects([0],[0],[self.size[0]],[self.size[1]], color = self.__color.color)
+        self.fill_styled_rects([0],[0],[self.width],[self.height], color = self.__color.color)
         
         # axis
         if self.__axis:
-            self.stroke_styled_line_segments([[(-self.size[0],0),(self.size[0],0)],[(0,self.size[1]),(0,-self.size[1])]], color=self.__axis_color.color)
+            self.stroke_styled_line_segments([[(-self.width,0),(self.width,0)],[(0,self.height),(0,-self.height)]], color=self.__axis_color.color)
 
     def move_coor(self, x, y):
         try : 
             if type(x) == int and type(y) == int :
-                moved_x = x + self.size[0]/2
-                moved_y = self.size[1]/2 - y
+                moved_x = x + self.width/2
+                moved_y = self.height/2 - y
             else:
-                moved_x = [xx + self.size[0]/2 for xx in x]
-                moved_y = [self.size[1]/2 - yy for yy in y]
+                moved_x = [xx + self.width/2 for xx in x]
+                moved_y = [self.height/2 - yy for yy in y]
         except :
             sys.stderr.write("x, y must be same type : int, arr")
         
