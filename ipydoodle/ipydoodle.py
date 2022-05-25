@@ -5,7 +5,7 @@ import sys
 import time
 import threading
 from IPython.display import display
-import numpy
+import numpy # Installed by ipycanvas package
 
 FREQUENCY = 30
 DEFAULT = {
