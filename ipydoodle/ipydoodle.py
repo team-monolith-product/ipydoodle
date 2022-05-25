@@ -32,8 +32,8 @@ class Canvas(ipycanvas.Canvas):
             self.stroke_styled_line_segments([[(-self.width,0),(self.width,0)],[(0,self.height),(0,-self.height)]], color=self.__axis_color.color)
 
     def move_coor(self, x, y):
-        try : 
-            if type(x) == int and type(y) == int :
+        try :
+            if (type(x) == int or type(x) == float) and (type(y) == int or type(y) == float) :
                 moved_x = x + self.width/2
                 moved_y = self.height/2 - y
             else:
@@ -450,7 +450,7 @@ class Line(WorldObject):
         
 
 class Circle(WorldObject):
-    def __init__(self, world=None, x=None , y=None , radius=None, color='black', alpha=1):
+    def __init__(self, world=None, x=None , y=None , radius=None, color='black', alpha=1, trail = False):
         super().__init__(world)
         
         if x is None and y is None:
@@ -464,11 +464,16 @@ class Circle(WorldObject):
         self.__radius = radius
         self.__color = Color(color)
         self.__alpha = alpha
-        
+        self.__pos_history = [(x,y)]
+        self.__trail = trail
+
         self.dirty()
         
     def draw(self):
         self.canvas().fill_styled_circles([self.__x], [self.__y], [self.__radius], color=self.__color.color)
+
+        if self.__trail:
+            self.canvas().stroke_styled_line_segments([[pos for pos in self.__pos_history]], color=self.__color.color)
     
     @property
     def color(self):
@@ -503,11 +508,13 @@ class Circle(WorldObject):
     @x.setter
     def x(self, val):
         self.__x = val
+        self.__pos_history.append((self.__x, self.__y))
         self.dirty()
 
     @y.setter
     def y(self, val):
         self.__y = val
+        self.__pos_history.append((self.__x, self.__y))
         self.dirty()
         
     @radius.setter
