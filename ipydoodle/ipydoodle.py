@@ -299,8 +299,7 @@ class Box(WorldObject):
         if not height:
             height = DEFAULT["Box"]["height"]
         
-        self.__x = x
-        self.__y = y
+        self.__pos = x,y
         self.__width = width
         self.__height = height
         self.__color = Color(color)
@@ -311,7 +310,7 @@ class Box(WorldObject):
         self.dirty()
         
     def draw(self):
-        self.canvas().fill_styled_rects([self.__x], [self.__y], [self.__width], [self.__height], [self.__color.color], alpha=self.__alpha)
+        self.canvas().fill_styled_rects([self.pos[0]], [self.pos[1]], [self.__width], [self.__height], [self.__color.color], alpha=self.__alpha)
 
         if self.__trail:
             self.canvas().stroke_styled_line_segments([[pos for pos in self.__pos_history]], color=self.__color.color)
@@ -335,12 +334,16 @@ class Box(WorldObject):
         self.dirty()
         
     @property
+    def pos(self):
+        return self.__pos
+
+    @property
     def x(self):
-        return self.__x
+        return self.__pos[0]
     
     @property
     def y(self):
-        return self.__y
+        return self.__pos[1]
     
     @property
     def width(self):
@@ -352,14 +355,16 @@ class Box(WorldObject):
         
     @x.setter
     def x(self, val):
-        self.__x = val
-        self.__pos_history.append((self.__x, self.__y))
-        self.dirty()
+        self.pos = val, self.__pos[1]
 
     @y.setter
     def y(self, val):
-        self.__y = val
-        self.__pos_history.append((self.__x, self.__y))
+        self.pos = self.__pos[0], val 
+    
+    @pos.setter
+    def pos(self, val):
+        self.__pos = tuple(val)
+        self.__pos_history.append(self.__pos)
         self.dirty()
         
     @width.setter
@@ -466,8 +471,7 @@ class Circle(WorldObject):
         if radius is None:
             radius = DEFAULT["Circle"]["radius"]
             
-        self.__x = x
-        self.__y = y
+        self.__pos = (x,y)
         self.__radius = radius
         self.__color = Color(color)
         self.__alpha = alpha
@@ -477,7 +481,7 @@ class Circle(WorldObject):
         self.dirty()
         
     def draw(self):
-        self.canvas().fill_styled_circles([self.__x], [self.__y], [self.__radius], color=self.__color.color)
+        self.canvas().fill_styled_circles([self.__pos[0]], [self.__pos[1]], [self.__radius], color=self.__color.color)
 
         if self.__trail:
             self.canvas().stroke_styled_line_segments([[pos for pos in self.__pos_history]], color=self.__color.color)
@@ -499,14 +503,18 @@ class Circle(WorldObject):
     def alpha(self, val):
         self.__alpha = val
         self.dirty()
-        
+
+    @property
+    def pos(self):
+        return self.__pos
+
     @property
     def x(self):
-        return self.__x
+        return self.__pos[0]
     
     @property
     def y(self):
-        return self.__y
+        return self.__pos[1]
     
     @property
     def radius(self):
@@ -514,14 +522,16 @@ class Circle(WorldObject):
         
     @x.setter
     def x(self, val):
-        self.__x = val
-        self.__pos_history.append((self.__x, self.__y))
-        self.dirty()
+        self.pos = val, self.__pos[1]
 
     @y.setter
     def y(self, val):
-        self.__y = val
-        self.__pos_history.append((self.__x, self.__y))
+        self.pos = self.__pos[0], val 
+    
+    @pos.setter
+    def pos(self, val):
+        self.__pos = tuple(val)
+        self.__pos_history.append(self.__pos)
         self.dirty()
         
     @radius.setter
