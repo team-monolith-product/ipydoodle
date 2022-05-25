@@ -287,7 +287,7 @@ class WorldObject:
         
  
 class Box(WorldObject):
-    def __init__(self, world=None, x=None , y=None , width=None , height=None , color='black', alpha=1):
+    def __init__(self, world=None, x=None , y=None , width=None , height=None , color='black', alpha=1, trail = False):
         super(Box,self).__init__(world)
         
         if not x:
@@ -305,12 +305,17 @@ class Box(WorldObject):
         self.__height = height
         self.__color = Color(color)
         self.__alpha = alpha
-        
+        self.__pos_history = [(x,y)]
+        self.__trail = trail
+
         self.dirty()
         
     def draw(self):
         self.canvas().fill_styled_rects([self.__x], [self.__y], [self.__width], [self.__height], [self.__color.color], alpha=self.__alpha)
-    
+
+        if self.__trail:
+            self.canvas().stroke_styled_line_segments([[pos for pos in self.__pos_history]], color=self.__color.color)
+
     @property
     def color(self):
         return self.__color.color
@@ -348,11 +353,13 @@ class Box(WorldObject):
     @x.setter
     def x(self, val):
         self.__x = val
+        self.__pos_history.append((self.__x, self.__y))
         self.dirty()
 
     @y.setter
     def y(self, val):
         self.__y = val
+        self.__pos_history.append((self.__x, self.__y))
         self.dirty()
         
     @width.setter
