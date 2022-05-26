@@ -381,16 +381,20 @@ class Box(WorldObject):
 class Line(WorldObject):
     def __init__(self, world=None, x1=None , y1=None , x2=None , y2=None , color='black', alpha=1):
         super().__init__(world)
-        
+
         if x1 is None and y1 is None and x2 is None and y2 is None:
             x1 = DEFAULT["Line"]["x1"]
             y1 = DEFAULT["Line"]["y1"]
             x2 = DEFAULT["Line"]["x2"]
             y2 = DEFAULT["Line"]["y2"]
-        elif x1 is None and y1 is None:
+        elif (x1 is None) or (y1 is None):
+            raise SyntaxError(f'x1 and y1 must be given together : {"x1"if x1 is None else "y1"}')
+        elif (x2 is None) or (y2 is None):
+            raise SyntaxError(f'x2 and y2 must be given together : {"x2"if x2 is None else "y2"}')
+        elif (x1 is None) and (y1 is None):
             x1 = 0
             y1 = 0
-        elif x2 is None and y2 is None:
+        elif (x2 is None) and (y2 is None):
             x2 = 0
             y2 = 0
 
