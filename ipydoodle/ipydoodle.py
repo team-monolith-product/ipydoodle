@@ -313,7 +313,7 @@ class Box(WorldObject):
         self.canvas().fill_styled_rects([self.pos[0]], [self.pos[1]], [self.__width], [self.__height], [self.__color.color], alpha=self.__alpha)
 
         if self.__trail:
-            self.canvas().stroke_styled_line_segments([[pos for pos in self.__pos_history]], color=self.__color.color)
+            self.canvas().stroke_styled_line_segments([[pos for pos in self.__pos_history]], color=self.__color.color, alpha = self.__alpha)
 
     @property
     def color(self):
@@ -404,7 +404,7 @@ class Line(WorldObject):
         self.dirty()
         
     def draw(self):
-        self.canvas().stroke_styled_line_segments([[(self.__x1,self.__y1),(self.__x2,self.__y2)]], color=self.__color.color)
+        self.canvas().stroke_styled_line_segments([[(self.__x1,self.__y1),(self.__x2,self.__y2)]], color=self.__color.color, alpha = self.__alpha)
     
     @property
     def color(self):
@@ -481,10 +481,10 @@ class Circle(WorldObject):
         self.dirty()
         
     def draw(self):
-        self.canvas().fill_styled_circles([self.__pos[0]], [self.__pos[1]], [self.__radius], color=self.__color.color)
+        self.canvas().fill_styled_circles([self.__pos[0]], [self.__pos[1]], [self.__radius], color=self.__color.color, alpha = self.__alpha)
 
         if self.__trail:
-            self.canvas().stroke_styled_line_segments([[pos for pos in self.__pos_history]], color=self.__color.color)
+            self.canvas().stroke_styled_line_segments([[pos for pos in self.__pos_history]], color=self.__color.color, alpha = self.__alpha)
     
     @property
     def color(self):
