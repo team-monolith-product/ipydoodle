@@ -469,9 +469,11 @@ class Circle(WorldObject):
     def __init__(self, world=None, x=None , y=None , radius=None, color='black', alpha=1, trail = False):
         super().__init__(world)
         
-        if x is None and y is None:
+        if not x:
             x = 0
+        if not y:
             y = 0
+
         if radius is None:
             radius = DEFAULT["Circle"]["radius"]
             
