@@ -106,7 +106,7 @@ class Color:
     def __change_color_type(self,val):
         if type(val) is str:
             if val[0] == '#' and len(val) == 7:
-                retval = list(int(val[1:3],16),int(val[3:5],16),int(val[5:7],16))
+                retval = [int(val[1:3],16),int(val[3:5],16),int(val[5:7],16)]
             else:
                 retval = self.__str2list(val.lower())
         elif type(val) is list:
