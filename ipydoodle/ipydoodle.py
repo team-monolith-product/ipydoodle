@@ -288,7 +288,7 @@ class WorldObject:
         
  
 class Box(WorldObject):
-    def __init__(self, world=None, x=None , y=None , width=None , height=None , color='black', alpha=1, trail = False, move_keyboard = None):
+    def __init__(self, world=None, x=None , y=None , width=None , height=None , color='black', alpha=1, trail = False):
         super(Box,self).__init__(world)
         
         if not x:
@@ -310,19 +310,6 @@ class Box(WorldObject):
 
         self.dirty()
 
-        if move_keyboard:
-            def on_keyboard_event(key, shift_key, ctrl_key, meta_key):
-                if key == "ArrowUp":
-                    self.y += move_keyboard
-                elif key == "ArrowDown":
-                    self.y -= move_keyboard
-                elif key == "ArrowRight":
-                    self.x += move_keyboard
-                elif key == "ArrowLeft":
-                    self.x -= move_keyboard
-
-            self.canvas().on_key_down(on_keyboard_event)
-        
     def draw(self):
         self.canvas().fill_styled_rects([self.pos[0]], [self.pos[1]], [self.__width], [self.__height], [self.__color.color], alpha=self.__alpha)
 
@@ -393,7 +380,7 @@ class Box(WorldObject):
         
 
 class Line(WorldObject):
-    def __init__(self, world=None, x1=None , y1=None , x2=None , y2=None , color='black', alpha=1, move_keyboard = None):
+    def __init__(self, world=None, x1=None , y1=None , x2=None , y2=None , color='black', alpha=1):
         super().__init__(world)
 
         if x1 is None and y1 is None and x2 is None and y2 is None:
@@ -420,19 +407,6 @@ class Line(WorldObject):
         self.__alpha = alpha
         
         self.dirty()
-
-        if move_keyboard:
-            def on_keyboard_event(key, shift_key, ctrl_key, meta_key):
-                if key == "ArrowUp":
-                    self.y += move_keyboard
-                elif key == "ArrowDown":
-                    self.y -= move_keyboard
-                elif key == "ArrowRight":
-                    self.x += move_keyboard
-                elif key == "ArrowLeft":
-                    self.x -= move_keyboard
-
-            self.canvas().on_key_down(on_keyboard_event)
         
     def draw(self):
         self.canvas().stroke_styled_line_segments([[(self.__x1,self.__y1),(self.__x2,self.__y2)]], color=self.__color.color, alpha = self.__alpha)
@@ -493,7 +467,7 @@ class Line(WorldObject):
         
 
 class Circle(WorldObject):
-    def __init__(self, world=None, x=None , y=None , radius=None, color='black', alpha=1, trail = False, move_keyboard = None):
+    def __init__(self, world=None, x=None , y=None , radius=None, color='black', alpha=1, trail = False):
         super().__init__(world)
         
         if not x:
@@ -512,20 +486,6 @@ class Circle(WorldObject):
         self.__trail = trail
 
         self.dirty()
-        
-        if move_keyboard:
-            def on_keyboard_event(key, shift_key, ctrl_key, meta_key):
-                if key == "ArrowUp":
-                    self.y += move_keyboard
-                elif key == "ArrowDown":
-                    self.y -= move_keyboard
-                elif key == "ArrowRight":
-                    self.x += move_keyboard
-                elif key == "ArrowLeft":
-                    self.x -= move_keyboard
-
-            self.canvas().on_key_down(on_keyboard_event)
-
 
     def draw(self):
         self.canvas().fill_styled_circles([self.__pos[0]], [self.__pos[1]], [self.__radius], color=self.__color.color, alpha = self.__alpha)
