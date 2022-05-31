@@ -6,6 +6,7 @@ import time
 from ipywidgets import Output
 from IPython.display import display
 import numpy # Installed by ipycanvas package
+from jupyter_ui_poll import ui_events
 
 FREQUENCY = 30
 DEFAULT = {
@@ -584,3 +585,10 @@ class Circle(WorldObject):
     def radius(self, val):
         self.__radius = val
         self.dirty()
+
+#update canvas rate
+#used in loop
+def update(t):
+    with ui_events() as poll:
+        poll(10)
+        time.sleep(t)
