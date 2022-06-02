@@ -65,6 +65,10 @@ class Canvas(ipycanvas.Canvas):
     def fill_styled_circles(self, x, y, radius, color, alpha=1):
         x,y = self.move_coor(x, y)
         super().fill_styled_circles(x, y, radius, color, alpha)
+
+    def fill_text(self, text, x, y, max_width=None):
+        x,y = self.move_coor(x, y)
+        super().fill_text(text, x, y, max_width)
         
     def stroke_styled_line_segments(self, points, color, alpha=1, points_per_line_segment=None):
         for l_idx in range(len(points)):
@@ -72,6 +76,13 @@ class Canvas(ipycanvas.Canvas):
                 points[l_idx][p_idx] = self.move_coor(*points[l_idx][p_idx])
         
         super().stroke_styled_line_segments(points, color, alpha, points_per_line_segment)
+    
+    def fill_styled_polygons(self, points, color, alpha=1, points_per_polygon=None):
+        for poly_idx in range(len(points)):
+            for p_idx in range(len(points[poly_idx])):
+                points[poly_idx][p_idx] = self.move_coor(*points[poly_idx][p_idx])
+        
+        super().fill_styled_polygons(points, color, alpha,  points_per_polygon)
     
     @property
     def color(self):
@@ -120,6 +131,9 @@ class Color:
             raise TypeError(f'Color does not support {type(val)} parameter')
             
         return retval
+    
+    def html(self):
+        return f'#{self.__color[0]:02x}{self.__color[1]:02x}{self.__color[2]:02x}'
     
     def __str2list(self,val):
         color_dict = {
@@ -182,6 +196,9 @@ class World:
         self.objects = []
         self.rendered_at = None
 
+        # Canvas settings
+        self.canvas.text_baseline = 'middle'
+        self.canvas.text_align = 'center'
 
         global CURRENT_WORLD
         CURRENT_WORLD = self
@@ -377,7 +394,85 @@ class Box(WorldObject):
     def height(self, val):
         self.__height = val
         self.dirty()
+
+
+class Text(WorldObject):
+    def __init__(self, world=None, text=None, x=0, y=0, size=12, color='black', font='serif'):
+        super(Text,self).__init__(world)
+
+        if text  is None:
+            text = 'TEXT'
         
+        self.__text = text
+        self.__x = x
+        self.__y = y
+        self.__size = size
+        self.__color = Color(color)
+        self.__font = font
+
+        self.dirty()
+
+    def draw(self):
+        tmp_style = self.canvas().fill_style
+        self.canvas().fill_style = self.__color.html()
+        self.canvas().font = f"{self.__size}px {self.__font}"
+        self.canvas().fill_text(self.__text, self.__x, self.__y)
+        self.canvas().fill_style = tmp_style
+    
+    @property
+    def x(self):
+        return self.__x
+
+    @property
+    def y(self):
+        return self.__y
+    
+    @property
+    def text(self):
+        return self.__text
+
+    @property
+    def size(self):
+        return self.__size
+
+    @property
+    def color(self):
+        return self.__color.color
+    
+    @property
+    def font(self):
+        return self.__font
+        
+    @x.setter
+    def x(self, val):
+        self.__x = val
+        self.dirty()
+
+    @y.setter
+    def y(self, val):
+        self.__y = val
+        self.dirty()
+
+    @text.setter
+    def text(self, val):
+        self.__text = val
+        self.dirty()
+
+    @size.setter
+    def size(self, val):
+        self.__size = val
+        self.dirty()
+
+    @color.setter
+    def color(self, val):
+        self.__color.color = val
+        self.dirty()
+
+    @text.setter
+    def font(self, val):
+        self.__font = val
+        self.dirty()            
+
 
 class Line(WorldObject):
     def __init__(self, world=None, x1=None , y1=None , x2=None , y2=None , color='black', alpha=1):
@@ -464,7 +559,60 @@ class Line(WorldObject):
     def y2(self, val):
         self.__y2 = val
         self.dirty()
+
+
+class Polygon(WorldObject):
+    def __init__(self, world=None, points=None, color='black', alpha=1):
+        super().__init__(world)
+
+        if points is None:
+            points = [(50,50),(50,-50),(-50,-50),(-50,50)] #square
+
+        self.__valid_check(points)
+
+        self.__points = list(points)
+        self.__color = Color(color)
+        self.__alpha = alpha
         
+        self.dirty()
+    
+    def __valid_check(self, points):
+        if type(points) != list and type(points) != tuple and type(points) != numpy.ndarray:
+            raise TypeError(f"Wrong type for points, points should be list or tuple or numpy array : {type(points)}")
+        
+        return
+        
+    def draw(self):
+        self.canvas().fill_styled_polygons(points = [self.__points], color = [self.__color.color], alpha=self.__alpha)
+    
+    @property
+    def color(self):
+        return self.__color.color
+    
+    @property
+    def alpha(self):
+        return self.__alpha
+        
+    @color.setter
+    def color(self, val):
+        self.__color.color = val
+        self.dirty()
+
+    @alpha.setter
+    def alpha(self, val):
+        self.__alpha = val
+        self.dirty()
+        
+    @property
+    def points(self):
+        return self.__points
+
+    @points.setter
+    def points(self, val):
+        self.__valid_check(val)
+        self.__points = val
+        self.dirty()
+
 
 class Circle(WorldObject):
     def __init__(self, world=None, x=None , y=None , radius=None, color='black', alpha=1, trail = False):
