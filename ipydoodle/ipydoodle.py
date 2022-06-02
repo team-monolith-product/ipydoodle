@@ -552,3 +552,7 @@ def update(t):
     with ui_events() as poll:
         poll(10)
         time.sleep(t)
+
+def bind(action, callback):
+    if action == 'on_key_down':
+        CURRENT_WORLD.canvas.on_key_down(callback)
