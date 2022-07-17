@@ -8,7 +8,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="ipydoodle",
-    version="0.1.1",
+    version="0.1.2",
     # use the code below to enable extensions automatically
     install_requires=[
         'ipycanvas==0.12.0'
